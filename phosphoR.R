@@ -476,8 +476,6 @@ phosphoR <- function(base,
     p = wrap_plots(plotlist) +
       plot_layout(guides="collect")
     
-    return(p)
-    
     #############
     ## OUTPUTS ##
     #############
@@ -489,6 +487,8 @@ phosphoR <- function(base,
     ggsave(p,file=paste0(plotFolder,plotName,".png"),
            width=w,
            height=h)
+    
+    return(p)
   }
   
 }
