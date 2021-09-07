@@ -3,8 +3,7 @@ phosphoR <- function(base,
                      minCiteCount = 3,
                      removeDels = F,
                      geneList,
-                     plotName ,
-                     plotFolder,
+                     plotName,
                      w=12,
                      h=10
 ){
@@ -212,7 +211,7 @@ phosphoR <- function(base,
     out.df= rbind.data.frame(out.df,temp.df)
     
     # report progress
-    cat(round(i*100/length(ids),2),"\n")
+    cat(round(i*100/length(ids),2),"% \n")
     
   }
   
@@ -443,6 +442,14 @@ phosphoR <- function(base,
       pg <- plot_grid(domains, disorder, align = "v", axis = "lrtb", nrow=3, rel_heights = c(.5,2))
     }
     
+    
+    #############
+    ## OUTPUTS ##
+    #############
+    
+    plotFolder = paste0(base,plotName,"_plot/")
+    dir.create(plotFolder, showWarnings = F)
+    
     ggsave(pg,
            filename = paste0(plotFolder,gene,".pdf"),
            width=4,
@@ -464,9 +471,6 @@ phosphoR <- function(base,
   #############
   ## OUTPUTS ##
   #############
-  
-  plotFolder = paste0(base,plotName,"_plot/")
-  dir.create(plotFolder, showWarnings = F)
   
   ggsave(p,file=paste0(plotFolder,plotName,".pdf"),
          width=w,
