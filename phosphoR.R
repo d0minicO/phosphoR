@@ -308,22 +308,6 @@ phosphoR <- function(base,
     unique()
 
   
-  
-  if(returnData){
-    cat("Returning the data frames as a list")
-    
-    out_list =
-      list(dat,
-         out.df,
-         out.df2,
-         out.df3)
-    
-    
-    return(out_list)
-  } else {
-    cat("Dataframe not requested \n")
-  }
-  
   if(plotResults){
     cat("Analysis done, moving on to plotting... \n")
     
@@ -496,6 +480,23 @@ phosphoR <- function(base,
            width=w,
            height=h)
     
+  }
+  
+  
+  
+  if(returnData){
+    cat("Returning the data frames as a list")
+    
+    out_list =
+      list(dat,
+           out.df,
+           out.df2,
+           out.df3)
+    
+    
+    return(out_list)
+  } else {
+    cat("Dataframe not requested \n")
     return(p)
   }
   
