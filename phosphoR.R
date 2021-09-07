@@ -391,6 +391,7 @@ phosphoR <- function(base,
           scale_x_continuous(expand=c(0,0))+
           scale_y_continuous(expand=c(0,0),breaks=NULL)+
           labs(x=NULL, y="PTMs") + 
+          guides(color=T)+
           ggtitle(gene)+
           science_theme + 
           theme(
