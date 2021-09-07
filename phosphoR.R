@@ -31,6 +31,11 @@ phosphoR <- function(base,
   
   ## input is a vector of human gene symbols (eg geneList = c("geneA","geneB","geneC"))
   
+  ## requires the Ubiquitin and phosphorylation datasets to have been downloaded from phosphosite https://www.phosphosite.org/
+  ## or use these that were downloaded in August 2021
+  ## https://github.com/d0minicO/phosphoR/blob/main/Phosphorylation_site_dataset.txt
+  ## https://github.com/d0minicO/phosphoR/blob/main/Phosphosite_Ubiquitination_site_dataset.txt
+  ## these files should be downloaded and placed in the "base" directory
   
   ##############
   ## PACKAGES ##
