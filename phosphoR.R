@@ -232,7 +232,7 @@ phosphoR <- function(base,
   out.df %<>%
     mutate(fasta = paste0(">",GENE,"_",ACC_ID,"\n",seq))
   
-  cat("Now scanning PfamScan from protein domains! \n")
+  cat("Now scanning PfamScan for protein domains! \n")
   
   ## perform the pfamscan
   out.df2 = data.frame()
@@ -465,6 +465,7 @@ phosphoR <- function(base,
   ## OUTPUTS ##
   #############
   
+  plotFolder = paste0(base,plotName,"_plot/")
   dir.create(plotFolder, showWarnings = F)
   
   ggsave(p,file=paste0(plotFolder,plotName,".pdf"),
