@@ -1,28 +1,13 @@
-
-
-
-base = "C:/Users/dowens/OneDrive/Postdoc/Projects/GID4/Paper/Bioinformatics/Ubiquitination/"
-
-
-data_folder = "C:/Users/dowens/OneDrive/Postdoc/Projects/GID4/Paper/Bioinformatics/GID_substrate_correlations/"
-
-# uniprot deleted accessions
-del_data = paste0(data_folder,"Uniprot_Deleted_accessions_all.RData")
-
-## set the threshold of the minimum number of citations to use for phos and Ub mod data
-minCiteCount = 3
-
-removeDels = F
-
-
-geneList = c("DDX58","DDX50","DDX21")
-
-
 phosphoR <- function(base,
                      del_data,
                      minCiteCount = 3,
                      removeDels = F,
-                     geneList){
+                     geneList,
+                     plotName ,
+                     plotFolder,
+                     w=12,
+                     h=10
+){
 
   
   ## this function is to analyse phosphosite data on ubiquitination / phosphorylation of proteins
@@ -58,7 +43,7 @@ phosphoR <- function(base,
   ## FUNCTIONS ##
   ###############
   
-  # source my custom functions
+  # source custom functions
   devtools::source_url("https://github.com/d0minicO/phosphoR/blob/main/customFunctions.R?raw=TRUE")
   
   
@@ -83,7 +68,7 @@ phosphoR <- function(base,
   customColors =c("darkolivegreen3", "darkorchid1", "grey65")
   
   
-  
+
   
   
   ###############
@@ -92,14 +77,19 @@ phosphoR <- function(base,
   
   ## load the deleted IDs data if needed (or skip to save time)
   if(removeDels){
-    del_accs = readRDS(del_data)
+    cat("Loading the database of deleted IDs that should be located here \n", del_data, " \n")
+     del_accs = readRDS(del_data)
     # set keys to help join faster
     setkey(del_accs, "ID")
+  } else{
+    cat("Skipping removing deleted uniprot accessions! \n")
   }
   
   
   
   ## load the phosphosite data
+  
+  cat("Loading the phosphosite data that should be located in \n", base, " \n")
   
   ub = read_tsv(paste0(base,"Phosphosite_Ubiquitination_site_dataset.txt")) %>%
     mutate(Type="Ub")
@@ -177,6 +167,8 @@ phosphoR <- function(base,
   ids %<>% makeChar
   
   # remove ones that are not listed as deleted but throw an error
+  ### if you receive an error that the table is empty when getting sequences from uniprot, 
+  ## then try adding the ID that failed to this list
   
   otherDels = c(
     "AAA58698",
@@ -200,6 +192,8 @@ phosphoR <- function(base,
   
   ## pull the sequences from uniprot
   
+  cat("Now downloading sequences from uniprot! \n")
+  
   out.df = data.frame()
   for(i in 1:nrow(names)){
     
@@ -222,6 +216,7 @@ phosphoR <- function(base,
     
   }
   
+  cat("Done! \n")
   out.df %<>% as_tibble()
   
   #closeAllConnections()
@@ -236,6 +231,8 @@ phosphoR <- function(base,
   
   out.df %<>%
     mutate(fasta = paste0(">",GENE,"_",ACC_ID,"\n",seq))
+  
+  cat("Now scanning PfamScan from protein domains! \n")
   
   ## perform the pfamscan
   out.df2 = data.frame()
@@ -265,7 +262,7 @@ phosphoR <- function(base,
     
   }
   
-  
+  cat("Done! \n")
   out.df2 %<>% as_tibble()
   
   
@@ -278,6 +275,8 @@ phosphoR <- function(base,
   
   
   ## now calculate the intrinsic disorder to plot which is the backbone really
+  
+  cat("Now calculating intrinsic disorder! \n")
   
   out.df3 = data.frame()
   for(i in 1:nrow(out.df)){
@@ -296,6 +295,7 @@ phosphoR <- function(base,
     
   }
   
+  cat("Done! \n")
   
   ### now the main plotting
   
@@ -307,6 +307,7 @@ phosphoR <- function(base,
     unique()
   
   
+  cat("Analysis done, moving on to plotting... \n")
   
   plotlist = list()
   for(gene in genes){
@@ -456,38 +457,22 @@ phosphoR <- function(base,
   
   p = wrap_plots(plotlist) +
     plot_layout(guides="collect")
-  #plot_annotation(title = "Intrinsic disorder plot (idpr/IUPred2)",
-  #                theme = theme(plot.title = element_text(size = 15)))
+  
   
   return(p)
   
+  #############
+  ## OUTPUTS ##
+  #############
+  
+  dir.create(plotFolder, showWarnings = F)
+  
+  ggsave(p,file=paste0(plotFolder,plotName,".pdf"),
+         width=w,
+         height=h)
+  
+  ggsave(p,file=paste0(plotFolder,plotName,".png"),
+         width=w,
+         height=h)
+  
 }
-
-
-
-
-#############
-## OUTPUTS ##
-#############
-
-### name of merged plot
-plotName = "DDX58_aka_RIG-I_list"
-
-# folder to output plots into
-plotFolder = paste0(base, plotName,"_plots/")
-dir.create(plotFolder, showWarnings = F)
-
-# set width
-w=12
-# height
-h=10
-
-
-
-ggsave(p,file=paste0(plotFolder,plotName,".pdf"),
-       width=w,
-       height=h)
-
-ggsave(p,file=paste0(plotFolder,plotName,".png"),
-       width=w,
-       height=h)
