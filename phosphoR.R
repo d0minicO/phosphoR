@@ -310,8 +310,16 @@ phosphoR <- function(base,
   
   
   if(returnData){
-    cat("Returning the data frame")
-    return(out.df)
+    cat("Returning the data frames as a list")
+    
+    out_list =
+      list(dat,
+         out.df,
+         out.df2,
+         out.df3)
+    
+    
+    return(out_list)
   } else {
     cat("Dataframe not requested \n")
   }
