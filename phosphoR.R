@@ -5,7 +5,9 @@ phosphoR <- function(base,
                      geneList,
                      plotName,
                      w=12,
-                     h=10
+                     h=10,
+                     returnData=F,
+                     plotResults=T
 ){
 
   
@@ -304,180 +306,189 @@ phosphoR <- function(base,
     dplyr::select(GENE) %>%
     makeChar %>%
     unique()
+
   
   
-  cat("Analysis done, moving on to plotting... \n")
+  if(returnData){
+    cat("Returning the data frame")
+    return(out.df)
+  } else {
+    cat("Dataframe not requested")
+  }
   
-  plotlist = list()
-  for(gene in genes){
+  if(plotResults){
+    cat("Analysis done, moving on to plotting... \n")
     
-    test1 = 
-      out.df %>%
-      filter(GENE==gene)
-    
-    if(nrow(test1)>1){
-      warning("Multiple genes matched fix input")
-      next
-    }
-    
-    
-    test2 = 
-      out.df2 %>%
-      filter(GENE==gene) %>%
-      mutate(start=as.numeric(start),
-             end=as.numeric(end),
-             length=end-start,
-             mid=start+(length/2))
-    
-    test3 = 
-      out.df3 %>%
-      filter(Prot==gene)
-    
-    
-    test4 =
-      dat %>%
-      mutate(position=as.numeric(position)) %>%
-      filter(GENE==gene & citeCount > minCiteCount)
-    
-    
-    ### 1 ###
-    
-    # Plot pfam domains
-    domains <- 
-      ggplot(test2) +
-      geom_hline(yintercept = 1, col = "blue",size=.5) +
-      geom_rect(aes(xmin=start, xmax=end, ymin=0.5, ymax=1.5), fill="grey") + 
-      scale_colour_manual(values = "blue") + 
-      geom_text(aes(label = name, x = mid ,y=1), size=2.5, col="black", fontface=1) +
-      coord_cartesian(ylim = c(0.5, 1.5), xlim=c(0,as.numeric(test1$length))) +
-      scale_x_continuous(expand=c(0,0))+
-      scale_y_continuous(expand=c(0,0),breaks=NULL)+
-      labs(x=NULL, y="Domains") + 
-      science_theme + 
-      theme(
-        legend.position="None",
-        #axis.text.y=element_blank(), 
-        axis.line.y=element_blank(),
-        #axis.ticks.y=element_blank(),
-        #axis.text.x=element_blank(), 
-        axis.line.x=element_blank(),
-        axis.ticks.x=element_line(size = .1),
-        panel.grid.major = element_blank(),
-        panel.border = element_blank(),
-        plot.margin = unit(c(0,.1,0,.1), "lines"),
-        panel.background = element_blank()
-      )
-    
-    ### 2 ###
-    
-    # Plot phos and Ub mods
-    if(nrow(test4)>1){
-      ptms =
-        ggplot(test4,aes(x=position,y=0,col=Type))+
-        geom_point(size=3)+#aes(size=citeCount)+
-        scale_size_continuous(range = c(4,5))+
-        coord_cartesian(ylim = c(-0.0125, 0.0125), xlim=c(0,as.numeric(test1$length))) +
+    plotlist = list()
+    for(gene in genes){
+      
+      test1 = 
+        out.df %>%
+        filter(GENE==gene)
+      
+      if(nrow(test1)>1){
+        warning("Multiple genes matched fix input")
+        next
+      }
+      
+      
+      test2 = 
+        out.df2 %>%
+        filter(GENE==gene) %>%
+        mutate(start=as.numeric(start),
+               end=as.numeric(end),
+               length=end-start,
+               mid=start+(length/2))
+      
+      test3 = 
+        out.df3 %>%
+        filter(Prot==gene)
+      
+      
+      test4 =
+        dat %>%
+        mutate(position=as.numeric(position)) %>%
+        filter(GENE==gene & citeCount > minCiteCount)
+      
+      
+      ### 1 ###
+      
+      # Plot pfam domains
+      domains <- 
+        ggplot(test2) +
+        geom_hline(yintercept = 1, col = "blue",size=.5) +
+        geom_rect(aes(xmin=start, xmax=end, ymin=0.5, ymax=1.5), fill="grey") + 
+        scale_colour_manual(values = "blue") + 
+        geom_text(aes(label = name, x = mid ,y=1), size=2.5, col="black", fontface=1) +
+        coord_cartesian(ylim = c(0.5, 1.5), xlim=c(0,as.numeric(test1$length))) +
         scale_x_continuous(expand=c(0,0))+
         scale_y_continuous(expand=c(0,0),breaks=NULL)+
-        labs(x=NULL, y="PTMs") + 
-        ggtitle(gene)+
+        labs(x=NULL, y="Domains") + 
         science_theme + 
         theme(
           legend.position="None",
           #axis.text.y=element_blank(), 
           axis.line.y=element_blank(),
-          axis.ticks.y=element_blank(),
-          axis.text.x=element_blank(), 
+          #axis.ticks.y=element_blank(),
+          #axis.text.x=element_blank(), 
           axis.line.x=element_blank(),
-          axis.ticks.x=element_blank(),
+          axis.ticks.x=element_line(size = .1),
           panel.grid.major = element_blank(),
           panel.border = element_blank(),
           plot.margin = unit(c(0,.1,0,.1), "lines"),
           panel.background = element_blank()
         )
-    } else {
-      domains =
-        domains +
-        ggtitle(gene)
-    }
-    
-    
-    ### 3 ###
-    
-    # Plot IDPR
-    disorder <- 
-      ggplot(test3, aes(x=Position, y=IUPred2)) + 
-      geom_line(aes(y=c(1)),alpha=.7)+
-      geom_line(aes(y=c(0)),alpha=.7)+
-      geom_line(aes(y=c(0.5)),alpha=.3, linetype="dotdash")+
-      geom_line(aes(color=IUPred2))+
-      scale_color_gradient2(high = customColors[1], 
-                            low = customColors[2], mid = customColors[3], 
-                            midpoint = 0.5)+
-      scale_x_continuous(expand=c(0,0))+
-      scale_y_continuous(expand=c(0,0),breaks=c(0,.5,1))+
-      guides(color=FALSE)+
-      xlab(NULL)+
-      ylab("Intrinsic Disorder")+
-      theme_bw()+
-      science_theme + 
-      theme(panel.background = element_blank(),
-            panel.border = element_blank(),
-            panel.grid.major = element_blank(),
-            panel.grid.minor = element_blank(),
-            axis.ticks.y = element_blank(),
+      
+      ### 2 ###
+      
+      # Plot phos and Ub mods
+      if(nrow(test4)>1){
+        ptms =
+          ggplot(test4,aes(x=position,y=0,col=Type))+
+          geom_point(size=3)+#aes(size=citeCount)+
+          scale_size_continuous(range = c(4,5))+
+          coord_cartesian(ylim = c(-0.0125, 0.0125), xlim=c(0,as.numeric(test1$length))) +
+          scale_x_continuous(expand=c(0,0))+
+          scale_y_continuous(expand=c(0,0),breaks=NULL)+
+          labs(x=NULL, y="PTMs") + 
+          ggtitle(gene)+
+          science_theme + 
+          theme(
+            legend.position="None",
+            #axis.text.y=element_blank(), 
+            axis.line.y=element_blank(),
+            axis.ticks.y=element_blank(),
             axis.text.x=element_blank(), 
             axis.line.x=element_blank(),
-            axis.line.y=element_blank(),
-            axis.ticks.x=element_blank())
-    
-    
-    ### 4 ###
-    
-    # combine plots and save into list or just plot alone
-    pg <- plot_grid(ptms, domains, disorder, align = "v", axis = "lrtb", nrow=3, rel_heights = c(.5,.5,2))
-    
-    if(nrow(test4)<1){
-      warning("No modifications to plot")
-      pg <- plot_grid(domains, disorder, align = "v", axis = "lrtb", nrow=3, rel_heights = c(.5,2))
+            axis.ticks.x=element_blank(),
+            panel.grid.major = element_blank(),
+            panel.border = element_blank(),
+            plot.margin = unit(c(0,.1,0,.1), "lines"),
+            panel.background = element_blank()
+          )
+      } else {
+        domains =
+          domains +
+          ggtitle(gene)
+      }
+      
+      
+      ### 3 ###
+      
+      # Plot IDPR
+      disorder <- 
+        ggplot(test3, aes(x=Position, y=IUPred2)) + 
+        geom_line(aes(y=c(1)),alpha=.7)+
+        geom_line(aes(y=c(0)),alpha=.7)+
+        geom_line(aes(y=c(0.5)),alpha=.3, linetype="dotdash")+
+        geom_line(aes(color=IUPred2))+
+        scale_color_gradient2(high = customColors[1], 
+                              low = customColors[2], mid = customColors[3], 
+                              midpoint = 0.5)+
+        scale_x_continuous(expand=c(0,0))+
+        scale_y_continuous(expand=c(0,0),breaks=c(0,.5,1))+
+        guides(color=FALSE)+
+        xlab(NULL)+
+        ylab("Intrinsic Disorder")+
+        theme_bw()+
+        science_theme + 
+        theme(panel.background = element_blank(),
+              panel.border = element_blank(),
+              panel.grid.major = element_blank(),
+              panel.grid.minor = element_blank(),
+              axis.ticks.y = element_blank(),
+              axis.text.x=element_blank(), 
+              axis.line.x=element_blank(),
+              axis.line.y=element_blank(),
+              axis.ticks.x=element_blank())
+      
+      
+      ### 4 ###
+      
+      # combine plots and save into list or just plot alone
+      pg <- plot_grid(ptms, domains, disorder, align = "v", axis = "lrtb", nrow=3, rel_heights = c(.5,.5,2))
+      
+      if(nrow(test4)<1){
+        warning("No modifications to plot")
+        pg <- plot_grid(domains, disorder, align = "v", axis = "lrtb", nrow=3, rel_heights = c(.5,2))
+      }
+      
+      
+      #############
+      ## OUTPUTS ##
+      #############
+      
+      plotFolder = paste0(base,plotName,"_plot/")
+      dir.create(plotFolder, showWarnings = F)
+      
+      ggsave(pg,
+             filename = paste0(plotFolder,gene,".pdf"),
+             width=4,
+             height=3)
+      
+      plotlist[[gene]] = pg
+      
     }
     
+    
+    ### plot all in one (optional)
+    
+    p = wrap_plots(plotlist) +
+      plot_layout(guides="collect")
+    
+    return(p)
     
     #############
     ## OUTPUTS ##
     #############
     
-    plotFolder = paste0(base,plotName,"_plot/")
-    dir.create(plotFolder, showWarnings = F)
+    ggsave(p,file=paste0(plotFolder,plotName,".pdf"),
+           width=w,
+           height=h)
     
-    ggsave(pg,
-           filename = paste0(plotFolder,gene,".pdf"),
-           width=4,
-           height=3)
-    
-    plotlist[[gene]] = pg
-    
+    ggsave(p,file=paste0(plotFolder,plotName,".png"),
+           width=w,
+           height=h)
   }
-  
-  
-  ### plot all in one (optional)
-  
-  p = wrap_plots(plotlist) +
-    plot_layout(guides="collect")
-  
-  
-  return(p)
-  
-  #############
-  ## OUTPUTS ##
-  #############
-  
-  ggsave(p,file=paste0(plotFolder,plotName,".pdf"),
-         width=w,
-         height=h)
-  
-  ggsave(p,file=paste0(plotFolder,plotName,".png"),
-         width=w,
-         height=h)
   
 }
