@@ -313,7 +313,7 @@ phosphoR <- function(base,
     cat("Returning the data frame")
     return(out.df)
   } else {
-    cat("Dataframe not requested")
+    cat("Dataframe not requested \n")
   }
   
   if(plotResults){
