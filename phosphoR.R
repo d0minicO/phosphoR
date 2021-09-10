@@ -259,7 +259,7 @@ phosphoR <- function(base,
                length = out.df$length[i],
                seq = out.df$seq[i])
     } else {
-      warning("No results for ", out.df$GENE[i], " next! \n")
+      warning("No pfamscan results for ", out.df$GENE[i]," \n")
       temp = data.frame()
     }
     
@@ -489,7 +489,7 @@ phosphoR <- function(base,
   
   
   if(returnData){
-    cat("Returning the data frames as a list")
+    cat("Returning the data frames as a list \n")
     
     out_list =
       list(dat,
