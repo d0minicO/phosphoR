@@ -244,20 +244,24 @@ phosphoR <- function(base,
                  maxchecktime = 1000)
     
     
-    
-    temp =
-      x %>%
-      filter(sig==1) %>%
-      dplyr::select(-align) %>%
-      dplyr::select(3,2) %>%
-      mutate(start = env$from,
-             end = env$to) %>%
-      dplyr::select(-env) %>%
-      mutate(GENE = out.df$GENE[i],
-             ACC_ID = out.df$ACC_ID[i],
-             length = out.df$length[i],
-             seq = out.df$seq[i])
-    
+    ## only want to rbind the pfamscan results that are not empty other wise error
+    if(length(x)>0){
+      temp =
+        x %>%
+        filter(sig==1) %>%
+        dplyr::select(-align) %>%
+        dplyr::select(3,2) %>%
+        mutate(start = env$from,
+               end = env$to) %>%
+        dplyr::select(-env) %>%
+        mutate(GENE = out.df$GENE[i],
+               ACC_ID = out.df$ACC_ID[i],
+               length = out.df$length[i],
+               seq = out.df$seq[i])
+    } else {
+      warning("No results for ", out.df$GENE[i], " next! \n")
+      temp = data.frame()
+    }
     
     out.df2 = rbind.data.frame(out.df2,temp)
     
