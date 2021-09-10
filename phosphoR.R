@@ -405,6 +405,8 @@ phosphoR <- function(base,
             panel.background = element_blank()
           )
       } else {
+        ptms = NULL
+        
         domains =
           domains +
           ggtitle(gene)
