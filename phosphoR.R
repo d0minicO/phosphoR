@@ -312,7 +312,9 @@ phosphoR <- function(base,
     unique()
 
   
-  if(plotResults){
+  if(!plotResults){
+  cat("Plotting not requested!")
+    } else if (plotResults){
     cat("Analysis done, moving on to plotting... \n")
     
     plotlist = list()
