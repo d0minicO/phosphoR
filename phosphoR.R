@@ -14,6 +14,7 @@ phosphoR <- function(base,
   ## this function is to analyse phosphosite data on ubiquitination / phosphorylation of proteins
   ## while also including info form pfam scan on protein domains
   ## and intrinsic disorder prediction by IUPred2
+  ## and downloads alpha fold predicted structure files from https://alphafold.ebi.ac.uk/
   
   ## input is a vector of human gene symbols (eg geneList = c("geneA","geneB","geneC"))
   
@@ -191,7 +192,54 @@ phosphoR <- function(base,
     filter(ACC_ID %in% ids)
   
   
-  ## pull the sequences from uniprot
+  
+  
+  
+  #########################
+  ## MAIN DATA CRUNCHING ##
+  #########################
+  
+
+  
+  #####
+  # 1 # 
+  ##### download ALPHAFOLD DATA
+  
+  cat("Now downloading alphafold predicted structure pdb files! \n")
+  
+  ## make a temp folder for the pdb files
+  pdb_dir = paste0(base,"pdb_files/")
+  dir.create(pdb_dir,showWarnings = F)
+  
+  
+  out.df = data.frame()
+  for(i in 1:nrow(names)){
+    
+    name = as.character(names[i,1])
+    id = as.character(names[i,2])
+    
+    ### download the alpha fold predicted pdb file from EBI
+    acc_url = paste0("https://alphafold.ebi.ac.uk/files/AF-",id,"-F1-model_v1.pdb")
+    
+    download.file(acc_url, destfile = paste0(pdb_dir,basename(acc_url)))
+    
+    
+    #read.pdb(paste0(pdb_dir,basename(acc_url)))
+    
+    # report progress
+    cat(round(i*100/length(ids),2),"% \n")
+    
+  }
+  
+  cat("Done! \n")
+  out.df %<>% as_tibble()
+  
+  
+  
+  
+  #####
+  # 2 # 
+  ##### pull the sequences from uniprot
   
   cat("Now downloading sequences from uniprot! \n")
   
@@ -225,9 +273,11 @@ phosphoR <- function(base,
   
   
   
-  ### now use pfamscanr to locate the protein domains (PfamScan is what phosphosite use, it looks like)
-  
-  
+  #####
+  # 3 # 
+  ##### use pfamscanr to locate the protein domains
+
+
   ### add a fasta column (with a header) to allow passing to pfamscan
   
   out.df %<>%
@@ -279,7 +329,9 @@ phosphoR <- function(base,
   
   
   
-  ## now calculate the intrinsic disorder to plot which is the backbone really
+  #####
+  # 4 # 
+  ##### calculate the intrinsic disorder to plot using IDPR
   
   cat("Now calculating intrinsic disorder! \n")
   
@@ -302,7 +354,11 @@ phosphoR <- function(base,
   
   cat("Done! \n")
   
-  ### now the main plotting
+  
+  
+  #######################
+  ## PLOTTING / EXPORT ##
+  #######################
   
   genes = 
     dat %>%
@@ -376,6 +432,7 @@ phosphoR <- function(base,
           plot.margin = unit(c(0,.1,0,.1), "lines"),
           panel.background = element_blank()
         )
+      
       
       ### 2 ###
       
@@ -458,6 +515,10 @@ phosphoR <- function(base,
       ## OUTPUTS ##
       #############
       
+      ## 1 ##
+      
+      ## each individual protein map
+      
       plotFolder = paste0(base,plotName,"_plot/")
       dir.create(plotFolder, showWarnings = F)
       
@@ -471,14 +532,13 @@ phosphoR <- function(base,
     }
     
     
-    ### plot all in one (optional)
+    ## 2 ##
+    
+    ### combination plot
     
     p = wrap_plots(plotlist) +
       plot_layout(guides="collect")
     
-    #############
-    ## OUTPUTS ##
-    #############
     
     ggsave(p,file=paste0(plotFolder,plotName,"_combo.pdf"),
            width=w,
@@ -490,7 +550,9 @@ phosphoR <- function(base,
     
   }
   
+  ## 3 ##
   
+  ### return a list of dfs containing the underlying data (if requested)
   
   if(returnData){
     cat("Returning the data frames as a list \n")
