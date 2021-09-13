@@ -221,7 +221,7 @@ phosphoR <- function(base,
     ### download the alpha fold predicted pdb file from EBI
     acc_url = paste0("https://alphafold.ebi.ac.uk/files/AF-",id,"-F1-model_v1.pdb")
     
-    download.file(acc_url, destfile = paste0(pdb_dir,basename(acc_url)))
+    download.file(acc_url, destfile = paste0(pdb_dir,name,"_",basename(acc_url)))
     
     
     #read.pdb(paste0(pdb_dir,basename(acc_url)))
