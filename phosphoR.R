@@ -480,11 +480,11 @@ phosphoR <- function(base,
     ## OUTPUTS ##
     #############
     
-    ggsave(p,file=paste0(plotFolder,plotName,".pdf"),
+    ggsave(p,file=paste0(plotFolder,plotName,"_combo.pdf"),
            width=w,
            height=h)
     
-    ggsave(p,file=paste0(plotFolder,plotName,".png"),
+    ggsave(p,file=paste0(plotFolder,plotName,"_combo.png"),
            width=w,
            height=h)
     
