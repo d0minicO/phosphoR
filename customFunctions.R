@@ -32,6 +32,12 @@ lsos <- function(..., n=10) {
 }
 
 
+## custom theme
+theme_dom = function(){
+  theme_bw()+
+    theme(panel.grid=element_blank())
+}
+
 
 
 `%notin%` = function(x,y) !(x %in% y)
