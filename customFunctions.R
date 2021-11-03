@@ -334,3 +334,9 @@ go_genes <- function(GO_list,p_thresh,ensembl,gene_set){
 }
 
 
+
+## custom theme
+theme_dom = function(){
+  theme_bw()+
+    theme(panel.grid=element_blank())
+}
