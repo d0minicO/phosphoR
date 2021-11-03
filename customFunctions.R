@@ -32,12 +32,6 @@ lsos <- function(..., n=10) {
 }
 
 
-## custom theme
-theme_dom = function(){
-  theme_bw()+
-    theme(panel.grid=element_blank())
-}
-
 
 
 `%notin%` = function(x,y) !(x %in% y)
@@ -160,7 +154,7 @@ get_go <- function (universe, de_genes, genome = "hg18", symbol = "geneSymbol"){
   GO_List <- list(MF = goseq(pwf, genome, symbol, test.cats = c("GO:MF")), 
                   BP = goseq(pwf, genome, symbol, test.cats = c("GO:BP")), 
                   CC = goseq(pwf, genome, symbol, test.cats = c("GO:CC")))#, 
-                  #KEGG = goseq(pwf, genome, symbol, test.cats = c("KEGG")))
+  #KEGG = goseq(pwf, genome, symbol, test.cats = c("KEGG")))
   GO_List <- lapply(GO_List, function(GO) {
     if ("term" %in% colnames(GO)) {
       return(GO)
@@ -257,12 +251,25 @@ go_genes <- function(GO_list,p_thresh,ensembl,gene_set){
     ## now get the list of GO categories
     cats = temp$category
     
-    # get the total list of genes associated with these go terms
-    test =
-      getBM(attributes = c('external_gene_name', 'go_id', 'name_1006'), 
-            filters = 'go', 
-            values = cats, 
-            mart = ensembl)
+    
+    test = data.frame()
+    for(cat in cats){
+      
+      
+      cat("looking for all genes associated with term ", cat, "\n")
+      
+      # get the total list of genes associated with these go terms
+      temp =
+        getBM(attributes = c('external_gene_name', 'go_id', 'name_1006'), 
+              filters = 'go', 
+              values = cat, 
+              mart = mart)
+      
+      
+      test = rbind.data.frame(test,temp)
+      
+    }
+    
     
     ## filter those genes that are in our gene set
     test %<>%
