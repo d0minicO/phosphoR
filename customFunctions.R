@@ -226,10 +226,10 @@ go_plot <- function(all_subs_go,plotName,plot_dir){
 }
 
 
-go_genes <- function(GO_list,p_thresh,ensembl,gene_set){
+go_genes <- function(GO_list,p_thresh,mart,gene_set){
   ## function takes a GO list from get_go function
   ## p value threshold to use
-  ## ensembl biomart object for gene / go matching
+  ## ensembl biomart object for gene / go matching (mart)
   ## the de_genes set of the genes used in get_go
   
   out_df = data.frame()
