@@ -32,6 +32,12 @@ lsos <- function(..., n=10) {
 }
 
 
+## custom theme
+theme_dom = function(){
+  theme_bw()+
+    theme(panel.grid=element_blank())
+}
+
 
 
 `%notin%` = function(x,y) !(x %in% y)
@@ -154,7 +160,7 @@ get_go <- function (universe, de_genes, genome = "hg18", symbol = "geneSymbol"){
   GO_List <- list(MF = goseq(pwf, genome, symbol, test.cats = c("GO:MF")), 
                   BP = goseq(pwf, genome, symbol, test.cats = c("GO:BP")), 
                   CC = goseq(pwf, genome, symbol, test.cats = c("GO:CC")))#, 
-  #KEGG = goseq(pwf, genome, symbol, test.cats = c("KEGG")))
+                  #KEGG = goseq(pwf, genome, symbol, test.cats = c("KEGG")))
   GO_List <- lapply(GO_List, function(GO) {
     if ("term" %in% colnames(GO)) {
       return(GO)
@@ -174,12 +180,11 @@ get_go <- function (universe, de_genes, genome = "hg18", symbol = "geneSymbol"){
 }
 
 
-go_plot <- function(all_subs_go,plotName,plot_dir,adjP=T){
+go_plot <- function(all_subs_go,plotName,plot_dir){
   # function takes a list outputted from get_go
   # and a character string (no spaces) to call the plot 
   # and the plotthing output directory
   # (ie whether this is list of all substrates, or only Nterminal Proline substrates)
-  # and takes a boolean to decide whether to adjust the pvalues or not (default is T, do adjust)
   
   # loop through each type of GO term and plot each one
   all_terms = names(all_subs_go)
@@ -189,12 +194,6 @@ go_plot <- function(all_subs_go,plotName,plot_dir,adjP=T){
     # get just one of the GO term types as a df
     go_out = 
       all_subs_go[[i]]
-    
-    
-    ## adjust the pval if requested
-    if(adjP){
-      go_out$over_represented_pvalue=p.adjust(go_out$over_represented_pvalue,method="BH")
-    }
     
     # filter the pvals for significantly overrepresented ones
     go_out %<>%
@@ -233,10 +232,10 @@ go_plot <- function(all_subs_go,plotName,plot_dir,adjP=T){
 }
 
 
-go_genes <- function(GO_list,p_thresh,mart,gene_set){
+go_genes <- function(GO_list,p_thresh,ensembl,gene_set){
   ## function takes a GO list from get_go function
   ## p value threshold to use
-  ## ensembl biomart object for gene / go matching (mart)
+  ## ensembl biomart object for gene / go matching
   ## the de_genes set of the genes used in get_go
   
   out_df = data.frame()
@@ -258,25 +257,12 @@ go_genes <- function(GO_list,p_thresh,mart,gene_set){
     ## now get the list of GO categories
     cats = temp$category
     
-    
-    test = data.frame()
-    for(cat in cats){
-      
-      
-      cat("looking for all genes associated with term ", cat, "\n")
-      
-      # get the total list of genes associated with these go terms
-      temp =
-        getBM(attributes = c('external_gene_name', 'go_id', 'name_1006'), 
-              filters = 'go', 
-              values = cat, 
-              mart = mart)
-      
-      
-      test = rbind.data.frame(test,temp)
-      
-    }
-    
+    # get the total list of genes associated with these go terms
+    test =
+      getBM(attributes = c('external_gene_name', 'go_id', 'name_1006'), 
+            filters = 'go', 
+            values = cats, 
+            mart = ensembl)
     
     ## filter those genes that are in our gene set
     test %<>%
@@ -341,9 +327,3 @@ go_genes <- function(GO_list,p_thresh,mart,gene_set){
 }
 
 
-
-## custom theme
-theme_dom = function(){
-  theme_bw()+
-    theme(panel.grid=element_blank())
-}
