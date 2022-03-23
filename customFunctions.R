@@ -347,8 +347,8 @@ theme_dom = function(){
   theme_bw()+
     theme(panel.grid=element_blank(),
           axis.text.x = element_blank(),
-          axis.text.y = element_text(size=4,hjust=1.5),
-          plot.title = element_text(size = 4, margin=margin(0,0,1,0)),
+          #axis.text.y = element_text(size=4,hjust=1.5),
+          #plot.title = element_text(size = 4, margin=margin(0,0,1,0)),
           panel.border = element_rect(size=.1),
           axis.ticks.x = element_blank(),
           axis.ticks.y = element_line(size = .1,lineend = "square"),
