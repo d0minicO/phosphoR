@@ -355,3 +355,10 @@ theme_dom = function(){
           axis.ticks.length.y = unit(.33, "mm"),
           panel.background = element_rect(fill = NA))
 }
+
+
+
+## convert AASGTring set from biostrings to a tibble
+aass2tib <- function(aass){
+  tibble(seq=as.character(aass), names=names(aass))
+}
