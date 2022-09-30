@@ -340,7 +340,10 @@ go_genes <- function(GO_list,p_thresh,mart,gene_set){
   return(out_df)
 }
 
-
+## for use in dplyr mutate(across(cols,fun))
+makeNum = function(x){
+  x = as.numeric(x)
+}
 
 ## custom theme making ggplot look publication ready for tiny plots
 theme_dom = function(){
