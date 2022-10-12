@@ -31,6 +31,9 @@ lsos <- function(..., n=10) {
   .ls.objects(..., order.by="Size", decreasing=TRUE, head=TRUE, n=n)
 }
 
+makeLog2 <- function(x){
+  x = log2(as.numeric(x))
+}
 
 
 
@@ -344,6 +347,9 @@ go_genes <- function(GO_list,p_thresh,mart,gene_set){
 makeNum = function(x){
   x = as.numeric(x)
 }
+
+
+%or% = function(x)
 
 ## custom theme making ggplot look publication ready for tiny plots
 theme_dom = function(){
