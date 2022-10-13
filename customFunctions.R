@@ -349,8 +349,6 @@ makeNum = function(x){
 }
 
 
-%or% = function(x)
-
 ## custom theme making ggplot look publication ready for tiny plots
 theme_dom = function(){
   theme_bw()+
